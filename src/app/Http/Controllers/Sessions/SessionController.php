@@ -137,31 +137,67 @@ class SessionController extends Controller
             ],
         ];
 
-        $rows = $session
+        $day_count = $session
             ->testRuns()
             ->completed()
-            ->selectRaw('COUNT(IF (total = passed, 1, NULL)) AS pass')
-            ->selectRaw('COUNT(IF (total != passed, 1, NULL)) AS fail')
-            ->selectRaw('DATE_FORMAT(created_at, "%c %d %b") as date')
-            ->whereRaw(
-                'DATE_FORMAT(completed_at, "%c %e %b") < DATE_ADD(NOW(), INTERVAL -1 MONTH)'
-            )
-            ->groupByRaw('DATE_FORMAT(created_at, "%c %d %b")')
-            ->orderByRaw('DATE_FORMAT(created_at, "%c %d %b") ASC')
-            ->limit(30)
+            ->selectRaw('DISTINCT DATE_FORMAT(created_at, "%d")')
             ->get()
-            ->toArray();
+            ->count();
+
+        if ($day_count === 1) {
+            $rows = $session
+                ->testRuns()
+                ->completed()
+                ->selectRaw('COUNT(IF (total = passed, 1, NULL)) AS pass')
+                ->selectRaw('COUNT(IF (total != passed, 1, NULL)) AS fail')
+                ->selectRaw('DATE_FORMAT(created_at, "%H:00") as date')
+                ->whereRaw(
+                    'DATE_FORMAT(completed_at, "%H:00") < DATE_ADD(NOW(), INTERVAL -1 MONTH)'
+                )
+                ->groupByRaw('DATE_FORMAT(created_at, "%H:00")')
+                ->orderByRaw('DATE_FORMAT(created_at, "%H:00") ASC')
+                ->limit(30)
+                ->get()
+                ->toArray();
+        } else {
+            $rows = $session
+                ->testRuns()
+                ->completed()
+                ->selectRaw('COUNT(IF (total = passed, 1, NULL)) AS pass')
+                ->selectRaw('COUNT(IF (total != passed, 1, NULL)) AS fail')
+                ->selectRaw('DATE_FORMAT(created_at, "%c %d %b") as date')
+                ->whereRaw(
+                    'DATE_FORMAT(completed_at, "%c %e %b") < DATE_ADD(NOW(), INTERVAL -1 MONTH)'
+                )
+                ->groupByRaw('DATE_FORMAT(created_at, "%c %d %b")')
+                ->orderByRaw('DATE_FORMAT(created_at, "%c %d %b") ASC')
+                ->limit(30)
+                ->get()
+                ->toArray();
+        }
 
         foreach ($rows as $row) {
-            $data[0]['data'][] = [
-                'x' => substr($row['date'], 2, 6),
-                'y' => $row['pass'],
-            ];
+            if ($day_count === 1) {
+                $data[0]['data'][] = [
+                    'x' => $row['date'],
+                    'y' => $row['pass'],
+                ];
 
-            $data[1]['data'][] = [
-                'x' => substr($row['date'], 2, 6),
-                'y' => $row['fail'],
-            ];
+                $data[1]['data'][] = [
+                    'x' => $row['date'],
+                    'y' => $row['fail'],
+                ];
+            } else {
+                    $data[0]['data'][] = [
+                        'x' => substr($row['date'], 2, 6),
+                        'y' => $row['pass'],
+                    ];
+
+                    $data[1]['data'][] = [
+                        'x' => substr($row['date'], 2, 6),
+                        'y' => $row['fail'],
+                    ];
+            }
         }
 
         return $data;
