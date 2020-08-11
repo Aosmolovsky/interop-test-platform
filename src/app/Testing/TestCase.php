@@ -6,7 +6,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestResult;
-use SebastianBergmann\Timer\Timer;
+use SebastianBergmann\Timer\Duration;
 use Throwable;
 
 abstract class TestCase extends Assert implements Test
@@ -39,16 +39,33 @@ abstract class TestCase extends Assert implements Test
     {
         $result = $result ?? new TestResult();
         $result->startTest($this);
-        Timer::start();
+        $startTime = (float) hrtime(true);
 
         try {
             $this->test();
         } catch (AssertionFailedError $e) {
-            $result->addFailure($this, $e, Timer::stop());
+            $result->addFailure(
+                $this,
+                $e,
+                $this->calculateDurationFromNanoseconds(
+                    $startTime
+                )->asMilliseconds()
+            );
         } catch (Throwable $e) {
-            $result->addError($this, $e, Timer::stop());
+            $result->addError(
+                $this,
+                $e,
+                $this->calculateDurationFromNanoseconds(
+                    $startTime
+                )->asMilliseconds()
+            );
         } finally {
-            $result->endTest($this, Timer::stop());
+            $result->endTest(
+                $this,
+                $this->calculateDurationFromNanoseconds(
+                    $startTime
+                )->asMilliseconds()
+            );
         }
 
         return $result;
@@ -60,5 +77,14 @@ abstract class TestCase extends Assert implements Test
     public function count()
     {
         return 1;
+    }
+
+    /**
+     * @param float $startTime
+     * @return Duration
+     */
+    protected function calculateDurationFromNanoseconds(float $startTime)
+    {
+        return Duration::fromNanoseconds((float) hrtime(true) - $startTime);
     }
 }

@@ -24,6 +24,26 @@ Route::name('legal.')
 Route::post('/dark-mode', 'DarkModeController')->name('dark-mode');
 
 /**
+ * Groups Routes
+ */
+Route::namespace('Groups')->group(function () {
+    Route::resource('groups', 'GroupController')->only(['index', 'show']);
+    Route::resource('groups.users', 'GroupUserController')->only([
+        'create',
+        'store',
+        'destroy',
+    ]);
+    Route::get(
+        'groups/{group}/user-candidates',
+        'GroupController@userCandidates'
+    )->name('groups.user-candidates');
+    Route::put(
+        'groups/{group}/users/{user}/toggle-admin',
+        'GroupUserController@toggleAdmin'
+    )->name('groups.users.toggle-admin');
+});
+
+/**
  * Sessions Routes
  */
 Route::name('sessions.')
@@ -38,6 +58,10 @@ Route::name('sessions.')
         Route::get('{session}/chart', 'SessionController@showChartData')->name(
             'chart'
         );
+        Route::get(
+            '{session}/message-log',
+            '\App\Http\Controllers\MessageLogController@index'
+        )->name('message-log.index');
         Route::get(
             '{session}/test-cases/{testCase}',
             'TestCaseController@show'
@@ -111,7 +135,7 @@ Route::name('testing.')
     ->namespace('Testing')
     ->group(function () {
         Route::any(
-            '{session:uuid}/{component:uuid}/{connection:uuid}/sut/{path?}',
+            '{session:uuid}/{componentId}/{connectionId}/sut/{path?}',
             'SutController'
         )
             ->name('sut')
@@ -154,6 +178,11 @@ Route::name('admin.')
                     'UserController@promoteRole'
                 )->name('promote-role');
             });
+        Route::resource('groups', 'GroupController')->except(['show']);
+        Route::get(
+            'message-log',
+            '\App\Http\Controllers\MessageLogController@admin'
+        )->name('message-log');
         Route::resource('sessions', 'SessionController')->only(['index']);
         Route::resource('api-specs', 'ApiSpecController')->only([
             'index',
@@ -169,9 +198,16 @@ Route::name('admin.')
                     'import.confirm'
                 );
             });
+        Route::resource('components', 'ComponentController')->except(['show']);
+        Route::get(
+            'components/connection-candidates',
+            'ComponentController@connectionCandidates'
+        )->name('components.connection-candidates');
         Route::resource('use-cases', 'UseCaseController')->except(['show']);
         Route::resource('test-cases', 'TestCaseController')->only([
             'index',
+            'edit',
+            'update',
             'destroy',
         ]);
         Route::name('test-cases.')
@@ -187,5 +223,13 @@ Route::name('admin.')
                     '{testCase}/toggle-public',
                     'TestCaseController@togglePublic'
                 )->name('toggle-public');
+                Route::get(
+                    'group-candidates',
+                    'TestCaseController@groupCandidates'
+                )->name('group-candidates');
             });
     });
+
+Route::get('/health', function () {
+    return 'ok';
+});

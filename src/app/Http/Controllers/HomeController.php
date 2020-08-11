@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\SessionResource;
+use App\Models\Session;
+use Illuminate\Database\Eloquent\Builder;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class HomeController extends Controller
 {
@@ -16,16 +19,25 @@ class HomeController extends Controller
     }
 
     /**
-     * @return \Inertia\Response
+     * @return Response
      */
     public function __invoke()
     {
         return Inertia::render('home', [
             'sessions' => SessionResource::collection(
-                auth()
-                    ->user()
-                    ->sessions()
+                Session::whereHas('owner', function (Builder $query) {
+                    $query
+                        ->whereKey(auth()->user())
+                        ->orWhereHas('groups', function (Builder $query) {
+                            $query->whereHas('users', function (
+                                Builder $query
+                            ) {
+                                $query->whereKey(auth()->user());
+                            });
+                        });
+                })
                     ->with([
+                        'owner',
                         'testCases' => function ($query) {
                             return $query->with(['useCase', 'lastTestRun']);
                         },

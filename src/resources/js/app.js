@@ -56,6 +56,9 @@ Vue.component('breadcrumb', () =>
 Vue.component('pagination', () =>
     import(/* webpackChunkName: "pagination" */ '@/components/pagination.vue')
 );
+Vue.component('selectize', () =>
+    import(/* webpackChunkName: "selectize" */ '@isneezy/vue-selectize')
+);
 Vue.component('confirm-link', () =>
     import(
         /* webpackChunkName: "confirm-link" */ '@/components/confirm-link.vue'
@@ -67,6 +70,11 @@ Vue.component('json-tree', () =>
 Vue.component('clipboard-copy-btn', () =>
     import(
         /* webpackChunkName: "clipboard-copy-btn" */ '@/components/clipboard-copy-btn.vue'
+    )
+);
+Vue.component('clipboard-json-to-curl', () =>
+    import(
+        /* webpackChunkName: "clipboard-json-to-curl" */ '@/components/clipboard-json-to-curl.vue'
     )
 );
 

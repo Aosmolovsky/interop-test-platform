@@ -21,6 +21,8 @@ class TestCaseResource extends JsonResource
             'behavior' => $this->behavior,
             'description' => Markdown::parse($this->description)->toHtml(),
             'precondition' => Markdown::parse($this->precondition)->toHtml(),
+            'owner' => new UserResource($this->whenLoaded('owner')),
+            'groups' => GroupResource::collection($this->whenLoaded('groups')),
             'useCase' => new UseCaseResource($this->whenLoaded('useCase')),
             'testSteps' => TestStepResource::collection(
                 $this->whenLoaded('testSteps')
@@ -45,6 +47,9 @@ class TestCaseResource extends JsonResource
                 'delete' => auth()
                     ->user()
                     ->can('delete', $this->resource),
+                'togglePublic' => auth()
+                    ->user()
+                    ->can('togglePublic', $this->resource),
             ],
         ];
     }

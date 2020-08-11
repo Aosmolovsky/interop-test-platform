@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Testing\Handlers;
 
+use App\Exceptions\MessageMismatchException;
 use App\Models\TestResult;
 use Throwable;
 
@@ -22,13 +23,16 @@ class SendingRejectedHandler
 
     /**
      * @param Throwable $exception
-     * @return Throwable
      */
     public function __invoke(Throwable $exception)
     {
         $this->testResult->fail($exception->getMessage());
         $this->testResult->testRun->complete();
 
-        return $exception;
+        throw new MessageMismatchException(
+            $this->testResult->session,
+            500,
+            $exception->getMessage()
+        );
     }
 }

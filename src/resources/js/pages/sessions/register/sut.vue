@@ -8,15 +8,17 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">SUT</label>
-                        <select
-                            v-model="form.component_id"
+                        <selectize
+                            v-model="component"
                             :class="{ 'is-invalid': $page.errors.component_id }"
+                            :options="suts.data"
+                            keyBy="id"
+                            :keys="['name']"
+                            label="name"
+                            :createItem="false"
                             class="form-select"
-                        >
-                            <option v-for="sut in suts.data" :value="sut.id">
-                                {{ sut.name }}
-                            </option>
-                        </select>
+                            placeholder="Select SUT..."
+                        />
                         <span
                             v-if="$page.errors.component_id"
                             class="invalid-feedback"
@@ -78,17 +80,28 @@ export default {
     data() {
         return {
             sending: false,
+            component:
+                this.session && this.session.sut
+                    ? collect(this.suts.data)
+                          .where('id', this.session.sut.component_id)
+                          .first()
+                    : collect(this.suts.data).first(),
             form: {
                 base_url:
                     this.session && this.session.sut
                         ? this.session.sut.base_url
                         : null,
-                component_id:
-                    this.session && this.session.sut
-                        ? this.session.sut.component_id
-                        : this.suts.data && this.suts.data[0].id,
+                component_id: null,
             },
         };
+    },
+    watch: {
+        component: {
+            immediate: true,
+            handler: function (value) {
+                this.form.component_id = value ? value.id : null;
+            },
+        },
     },
     methods: {
         submit() {

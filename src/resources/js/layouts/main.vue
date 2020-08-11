@@ -54,9 +54,12 @@
                             class="admin-settings-dropdown"
                             v-if="(
                                 $page.auth.user.can.users.viewAny ||
+                                $page.auth.user.can.groups.viewAny ||
                                 $page.auth.user.can.sessions.viewAny ||
                                 $page.auth.user.can.api_specs.viewAny ||
+                                $page.auth.user.can.components.viewAny ||
                                 $page.auth.user.can.use_cases.viewAny ||
+                                $page.auth.user.can.message_log.viewAny ||
                                 $page.auth.user.can.test_cases.viewAny
                             )"
                         >
@@ -70,6 +73,14 @@
                                     class="text-reset dropdown-item"
                                 >
                                     Users
+                                </inertia-link>
+                            </li>
+                            <li v-if="$page.auth.user.can.groups.viewAny">
+                                <inertia-link
+                                    :href="route('admin.groups.index')"
+                                    class="text-reset dropdown-item"
+                                >
+                                    Groups
                                 </inertia-link>
                             </li>
                             <li v-if="$page.auth.user.can.sessions.viewAny">
@@ -88,6 +99,14 @@
                                     Api Specs
                                 </inertia-link>
                             </li>
+                            <li v-if="$page.auth.user.can.components.viewAny">
+                                <inertia-link
+                                    :href="route('admin.components.index')"
+                                    class="text-reset dropdown-item"
+                                >
+                                    Components
+                                </inertia-link>
+                            </li>
                             <li v-if="$page.auth.user.can.use_cases.viewAny">
                                 <inertia-link
                                     :href="route('admin.use-cases.index')"
@@ -102,6 +121,14 @@
                                     class="text-reset dropdown-item"
                                 >
                                     Test Cases
+                                </inertia-link>
+                            </li>
+                            <li v-if="$page.auth.user.can.message_log.viewAny">
+                                <inertia-link
+                                    :href="route('admin.message-log')"
+                                    class="text-reset dropdown-item"
+                                >
+                                    Message Log
                                 </inertia-link>
                             </li>
                         </b-nav-item-dropdown>
@@ -192,6 +219,26 @@
                                 </span>
                                 <span class="nav-link-title">
                                     Sessions
+                                </span>
+                            </inertia-link>
+                        </li>
+                        <li
+                            class="nav-item"
+                            v-bind:class="{
+                                active: route().current('groups.*'),
+                            }"
+                        >
+                            <inertia-link
+                                :href="route('groups.index')"
+                                class="nav-link"
+                            >
+                                <span
+                                    class="nav-link-icon d-md-none d-lg-inline-block"
+                                >
+                                    <icon name="users" />
+                                </span>
+                                <span class="nav-link-title">
+                                    Groups
                                 </span>
                             </inertia-link>
                         </li>

@@ -43,9 +43,12 @@
                     <thead>
                         <tr>
                             <th class="text-nowrap">Name</th>
+                            <th class="text-nowrap">Behavior</th>
                             <th class="text-nowrap">Public</th>
                             <th class="text-nowrap">Use Case</th>
                             <th class="text-nowrap">Test Steps</th>
+                            <th class="text-nowrap">Owner</th>
+                            <th class="text-nowrap">Groups</th>
                             <th class="text-nowrap w-1"></th>
                         </tr>
                     </thead>
@@ -55,9 +58,16 @@
                                 {{ testCase.name }}
                             </td>
                             <td class="text-break">
+                                {{
+                                    collect(
+                                        $page.enums.test_case_behaviors
+                                    ).get(testCase.behavior)
+                                }}
+                            </td>
+                            <td class="text-break">
                                 <label class="form-check form-switch">
                                     <input
-                                        v-if="testCase.can.update"
+                                        v-if="testCase.can.togglePublic"
                                         class="form-check-input"
                                         type="checkbox"
                                         :checked="testCase.public"
@@ -89,6 +99,14 @@
                                         : 0
                                 }}
                             </td>
+                            <td class="text-break">
+                                {{ testCase.owner ? testCase.owner.name : '' }}
+                            </td>
+                            <td class="text-break">
+                                {{
+                                    testCase.groups ? testCase.groups.length : 0
+                                }}
+                            </td>
                             <td class="text-center text-break">
                                 <b-dropdown
                                     v-if="testCase.can.delete"
@@ -101,6 +119,19 @@
                                     <template v-slot:button-content>
                                         <icon name="dots-vertical"></icon>
                                     </template>
+                                    <li v-if="testCase.can.update">
+                                        <inertia-link
+                                            class="dropdown-item"
+                                            :href="
+                                                route(
+                                                    'admin.test-cases.edit',
+                                                    testCase.id
+                                                )
+                                            "
+                                        >
+                                            Edit
+                                        </inertia-link>
+                                    </li>
                                     <li v-if="testCase.can.delete">
                                         <confirm-link
                                             class="dropdown-item"
@@ -121,7 +152,7 @@
                             </td>
                         </tr>
                         <tr v-if="!testCases.data.length">
-                            <td class="text-center" colspan="5">
+                            <td class="text-center" colspan="8">
                                 No Results
                             </td>
                         </tr>

@@ -9,16 +9,18 @@ use App\Http\Resources\UseCaseResource;
 use App\Models\Component;
 use App\Models\TestCase;
 use App\Models\UseCase;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 use Throwable;
 
 class RegisterController extends Controller
 {
     /**
-     * RegisterController constructor.
+     * @return void
      */
     public function __construct()
     {
@@ -32,7 +34,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * @return \Inertia\Response
+     * @return Response
      */
     public function showSutForm()
     {
@@ -49,7 +51,7 @@ class RegisterController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function storeSut(Request $request)
     {
@@ -63,7 +65,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * @return \Inertia\Response
+     * @return Response
      */
     public function showInfoForm()
     {
@@ -83,12 +85,21 @@ class RegisterController extends Controller
                                         ->get('session.sut.component_id')
                                 );
                             })
+                            ->where('public', true)
+                            ->orWhereHas('owner', function ($query) {
+                                $query->whereKey(auth()->user());
+                            })
+                            ->orWhereHas('groups', function ($query) {
+                                $query->whereHas('users', function ($query) {
+                                    $query->whereKey(auth()->user());
+                                });
+                            })
                             ->when(
-                                !auth()
+                                auth()
                                     ->user()
-                                    ->can('viewAny', TestCase::class),
+                                    ->can('viewAnyPrivate', TestCase::class),
                                 function ($query) {
-                                    $query->where('public', true);
+                                    $query->orWhere('public', false);
                                 }
                             );
                     },
@@ -118,7 +129,7 @@ class RegisterController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function storeInfo(Request $request)
     {
@@ -138,7 +149,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * @return \Inertia\Response
+     * @return Response
      */
     public function showConfigForm()
     {
@@ -161,7 +172,7 @@ class RegisterController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function storeConfig(Request $request)
     {

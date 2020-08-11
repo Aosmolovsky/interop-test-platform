@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasUuid;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
  * @mixin \Eloquent
@@ -51,6 +52,14 @@ class TestCase extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function useCase()
     {
         return $this->belongsTo(UseCase::class, 'use_case_id');
@@ -62,6 +71,19 @@ class TestCase extends Model
     public function testSteps()
     {
         return $this->hasMany(TestStep::class, 'test_case_id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(
+            Group::class,
+            'group_test_cases',
+            'test_case_id',
+            'group_id'
+        );
     }
 
     /**
@@ -106,5 +128,28 @@ class TestCase extends Model
         return $this->hasOne(TestRun::class, 'test_case_id')
             ->completed()
             ->latest();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getBehaviorNames()
+    {
+        return [
+            static::BEHAVIOR_NEGATIVE => __('Negative'),
+            static::BEHAVIOR_POSITIVE => __('Positive'),
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getBehaviorNameAttribute()
+    {
+        return Arr::get(
+            static::getBehaviorNames(),
+            $this->behavior,
+            $this->behavior
+        );
     }
 }
