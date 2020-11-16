@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\AuditLog;
 use App\Models\Component;
 use App\Models\Group;
 use App\Models\Session;
@@ -113,6 +114,11 @@ class InertiaServiceProvider extends ServiceProvider
                                     'viewAny' => auth()
                                         ->user()
                                         ->can('viewAny', MessageLog::class),
+                                ],
+                                'audit_log' => [
+                                    'viewAny' => auth()
+                                        ->user()
+                                        ->can('viewAny', AuditLog::class)
                                 ],
                             ],
                         ]

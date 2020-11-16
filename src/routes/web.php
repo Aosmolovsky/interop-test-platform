@@ -196,6 +196,10 @@ Route::name('admin.')
             'message-log',
             '\App\Http\Controllers\MessageLogController@admin'
         )->name('message-log');
+        Route::get(
+            'audit-log',
+            '\App\Http\Controllers\AuditLogController@admin'
+        )->name('audit-log');
         Route::resource('sessions', 'SessionController')->only(['index']);
         Route::resource('api-specs', 'ApiSpecController')->only([
             'index',
