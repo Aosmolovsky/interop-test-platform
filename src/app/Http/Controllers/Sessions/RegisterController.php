@@ -11,6 +11,7 @@ use App\Models\Component;
 use App\Models\GroupEnvironment;
 use App\Models\TestCase;
 use App\Models\UseCase;
+use App\Utils\AuditLogUtil;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -234,6 +235,9 @@ class RegisterController extends Controller
                 $session
                     ->components()
                     ->attach([$request->session()->get('session.sut')]);
+
+                // log session creation
+                new AuditLogUtil($request, 'created new session', $request->session()->get('session.info.uuid')->toString(), '');
 
                 return $session;
             });
