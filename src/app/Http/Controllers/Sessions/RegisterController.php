@@ -237,7 +237,7 @@ class RegisterController extends Controller
                     ->attach([$request->session()->get('session.sut')]);
 
                 // log session creation
-                new AuditLogUtil($request, 'created new session', $request->session()->get('session.info.uuid')->toString(), '');
+                new AuditLogUtil($request, 'created new session', $request->session()->get('session.info.uuid')->toString(), 2,'');
 
                 return $session;
             });
